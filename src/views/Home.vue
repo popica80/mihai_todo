@@ -1,18 +1,59 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <form @submit.prevent="submitTodo()">
+      <input type="text" v-model="form.title" class="form-control" />
+      <button type="submit" class="btn btn-success">add</button>
+    </form>
+    <Todos :todos="activeTodos" header="Active Todos" />
+    <Todos :todos="completedTodos" header="Completed Todos" />
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import axios from 'axios';
+import Todos from '@/components/Todos';
 
 export default {
-  name: 'home',
+  name: "home",
   components: {
-    HelloWorld
-  }
-}
+    Todos
+  },
+  computed: {
+    completedTodos() {
+      return this.todos.filter(todo => {
+        return todo.completed;
+      });
+    },
+    activeTodos() {
+      return this.todos.filter(todo => {
+        return !todo.completed;
+      });
+    }
+  },
+  data: () => ({    
+    form: {
+      title: '',
+      errors: []
+    },
+    todos: [
+    ],
+  }), 
+  methods: {
+    submitTodo() {
+      axios.post('http://todos.test/api/todos', { ...this.form}).then(response => {
+        this.todos.unshift(response.data);
+        this.form.title = "";
+      }).catch(errors => {
+        this.form.errors.push(errors.response.data.errors)
+      });       
+    }
+  },
+  mounted() {
+  },
+  created() {
+    axios.get('http://todos.test/api/todos').then(response => {
+      this.todos = response.data
+    })
+  },
+};
 </script>
