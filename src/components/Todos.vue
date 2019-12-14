@@ -1,6 +1,6 @@
 <template>
-  <div class="card mb-3">
-    <h5 class="card-header">{{ header }}</h5>
+  <div class="card">
+    <h5 class="card-header"><slot></slot></h5>
     <ul class="list-group">
       <li class="list-group-item" v-for="todo in todos" :key="todo.id">
         {{ todo.title }}

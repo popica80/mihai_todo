@@ -1,24 +1,43 @@
 <template>
   <div class="home">
-    <form @submit.prevent="submitTodo()">
-      <input type="text" v-model="form.title" class="form-control" />
+    <template v-if="logged_in">
+      welcome {{ user.name }}
+    <form @submit.prevent="submitTodo()" @keydown.enter.self="submitTodo()" class="d-flex mb-3">
+      <input type="text" v-model="form.title" class="form-control mr-2" autofocus />
       <button type="submit" class="btn btn-success">add</button>
     </form>
-    <Todos :todos="activeTodos" header="Active Todos" />
-    <Todos :todos="completedTodos" header="Completed Todos" />
+    <todos :todos="activeTodos">Active Todos</todos>
+    <todos :todos="completedTodos">Completed Todos</todos>
+    </template>
+    <template v-else>
+      <div class="card">
+        <div class="card-body">you must <router-link :to="{name: 'login'}">log in</router-link></div>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/plugins/axios'
 import Todos from '@/components/Todos';
+import { mapGetters, mapState } from 'vuex';
 
 export default {
   name: "home",
   components: {
     Todos
   },
-  computed: {
+  data: () => ({    
+    form: {
+      title: '',
+      errors: [],
+    },
+    todos: [
+    ],
+  }),
+  computed: { 
+    ...mapGetters('auth', ['logged_in']),
+    ...mapState('auth', ['user']),
     completedTodos() {
       return this.todos.filter(todo => {
         return todo.completed;
@@ -29,18 +48,10 @@ export default {
         return !todo.completed;
       });
     }
-  },
-  data: () => ({    
-    form: {
-      title: '',
-      errors: []
-    },
-    todos: [
-    ],
-  }), 
+  }, 
   methods: {
     submitTodo() {
-      axios.post('http://todos.test/api/todos', { ...this.form}).then(response => {
+      axios.post('/todos', { ...this.form}).then(response => {
         this.todos.unshift(response.data);
         this.form.title = "";
       }).catch(errors => {
@@ -48,10 +59,8 @@ export default {
       });       
     }
   },
-  mounted() {
-  },
   created() {
-    axios.get('http://todos.test/api/todos').then(response => {
+    axios.get('/todos').then(response => {
       this.todos = response.data
     })
   },

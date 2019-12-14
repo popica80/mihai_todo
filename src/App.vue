@@ -12,7 +12,6 @@ import Navbar from '@/components/TopNavbar'
 export default {
   components: {
     Navbar
-  },
-
+  }
 }
 </script>

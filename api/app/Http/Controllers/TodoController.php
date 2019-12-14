@@ -15,7 +15,7 @@ class TodoController extends Controller
      */
     public function index()
     {
-        return Todo::get();
+        return Todo::where('user_id', auth('api')->id())->latest()->get();
     }
 
     /**
@@ -32,7 +32,7 @@ class TodoController extends Controller
 
         $todo = new Todo();
         $todo->title = $request->input('title');
-        $todo->user_id = 1;
+        $todo->user_id = auth('api')->id();
         $todo->category_id = 1;
 
         $todo->save();
